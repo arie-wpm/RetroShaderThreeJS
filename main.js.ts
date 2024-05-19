@@ -1,7 +1,7 @@
 ﻿import * as THREE from "three"
 import {string} from "three/examples/jsm/nodes/shadernode/ShaderNode";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 
 const scene = new THREE.Scene();
@@ -17,6 +17,7 @@ const scale1: THREE.Vector3 = new THREE.Vector3( 1,1,1);
 const scale2: THREE.Vector3 = new THREE.Vector3( 5, 5, 5);
 const sceneObjects = [];
 const textureLoader = new THREE.TextureLoader();
+const gltfLoader = new GLTFLoader();
 let shaderMat: THREE.ShaderMaterial;
 
 
@@ -48,7 +49,7 @@ const waterTexture =  textureLoader.load( "./Textures/rainbowTex.jpg", function(
             scale: {value: new THREE.Vector3(1.0, 1.0, 1.0)},
             mainTex: {value: texture},
             resolution: {value: new THREE.Vector2(texture.image.width, texture.image.height)},
-            pixelSize: {value: 2},
+            pixelSize: {value: 64},
         },
         vertexShader: _VS,
         fragmentShader: _FS,
@@ -76,6 +77,9 @@ function InitSceneObjects(shaderMat){
     sceneObjects.push(sphereMesh2);
 }
 
+gltfLoader.load( "./Models/silent_ash/scene.gltf", function( gltf ){
+    scene.add(gltf.scene);
+})
 
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
