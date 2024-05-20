@@ -18,6 +18,8 @@ const scale2: THREE.Vector3 = new THREE.Vector3( 5, 5, 5);
 const sceneObjects = [];
 const textureLoader = new THREE.TextureLoader();
 const gltfLoader = new GLTFLoader();
+let rabbitModel;
+let rabbitModel2;
 let shaderMat: THREE.ShaderMaterial;
 
 
@@ -57,6 +59,20 @@ const waterTexture =  textureLoader.load( "./Textures/rainbowTex.jpg", function(
     InitSceneObjects(shaderMat);
 } );
 
+function CreatePixelShaderMaterial(){
+    return new THREE.ShaderMaterial({
+        uniforms:{
+            cubeColour: {value: new THREE.Vector3(1.0, 0.0,0.0)},
+            scale: {value: new THREE.Vector3(1.0, 1.0, 1.0)},
+            mainTex: {value: null},
+            resolution: {value: new THREE.Vector2(1,1)},
+            pixelSize: {value: 64},
+        },
+        vertexShader: _VS,
+        fragmentShader: _FS,
+    })
+}
+
 function InitSceneObjects(shaderMat){
     let boxGeometry = new THREE.BoxGeometry(20,20,20,10,10,10);
     let sphereMat1 = new THREE.MeshBasicMaterial({
@@ -78,8 +94,30 @@ function InitSceneObjects(shaderMat){
 }
 
 gltfLoader.load( "./Models/silent_ash/scene.gltf", function( gltf ){
+    rabbitModel = gltf.scene;
+    rabbitModel.traverse((o) => {
+        if (o.isMesh && o.material.map){
+            const objectShaderMat = CreatePixelShaderMaterial();
+            objectShaderMat.uniforms.mainTex.value = o.material.map;
+            objectShaderMat.uniforms.resolution.value = new THREE.Vector3(
+                o.material.map.image.width,
+                o.material.map.image.height
+            );
+            objectShaderMat.uniforms.pixelSize.value = 16;
+            o.material = objectShaderMat;
+        }
+    });
     scene.add(gltf.scene);
-})
+    gltf.scene.scale.set(30,30,30);
+    gltf.scene.position.set(-50,20,0);
+});
+
+gltfLoader.load( "./Models/silent_ash/scene.gltf", function( gltf ){
+    rabbitModel2 = gltf.scene;
+    scene.add(gltf.scene);
+    gltf.scene.scale.set(30,30,30);
+    gltf.scene.position.set(50,20,0);
+});
 
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -107,6 +145,10 @@ function animate() {
     for(let object of sceneObjects) {
         object.rotation.x += 0.01
         object.rotation.y += 0.01
+    }
+    if (rabbitModel && rabbitModel2){
+        rabbitModel.rotation.y += 0.01;
+        rabbitModel2.rotation.y += 0.01;
     }
     renderer.render(scene, camera);
 }
