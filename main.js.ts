@@ -18,8 +18,10 @@ const scale2: THREE.Vector3 = new THREE.Vector3( 5, 5, 5);
 const sceneObjects = [];
 const textureLoader = new THREE.TextureLoader();
 const gltfLoader = new GLTFLoader();
-let rabbitModel;
-let rabbitModel2;
+let model;
+let model2;
+let useShaderMaterial: boolean = true;
+let originalMaterials =[];
 let shaderMat: THREE.ShaderMaterial;
 
 
@@ -104,12 +106,12 @@ function CreatePixelShaderMaterial(){
             scale: {value: new THREE.Vector3(1.0, 1.0, 1.0)},
             mainTex: {value: null},
             resolution: {value: new THREE.Vector2(1,1)},
-            pixelSize: {value: 64},
+            pixelSize: {value: 16},
             bayerLevel: {value: 0},
             spread: {value: 0.2},
-            redColourCount: {value: 4},
-            greenColourCount: {value: 4},
-            blueColourCount: {value: 4},
+            redColourCount: {value: 2},
+            greenColourCount: {value: 16},
+            blueColourCount: {value: 2},
         },
         vertexShader: _VS,
         fragmentShader: _FS,
@@ -118,55 +120,71 @@ function CreatePixelShaderMaterial(){
 
 function InitSceneObjects(shaderMat){
     let boxGeometry = new THREE.BoxGeometry(20,20,20,10,10,10);
-    let sphereMat1 = new THREE.MeshBasicMaterial({
-        color: 0xff0000,
-    });
-    let sphereMat2 = new THREE.MeshBasicMaterial({
-        color: 0x0000ff,
-    });
-    let sphereMesh1 = new THREE.Mesh(boxGeometry, shaderMat);
-    sphereMesh1.position.set(-50,0,0);
+    let sphereGeometry: THREE.SphereGeometry = new THREE.SphereGeometry(20,10,10);
+    let sphereMesh1 = new THREE.Mesh(sphereGeometry, shaderMat);
+    sphereMesh1.position.set(0,-10,0);
     scene.add(sphereMesh1);
     sceneObjects.push(sphereMesh1);
+    gltfLoader.load( "./Models/bulbasaur/scene.gltf", function( gltf ){
+        model = gltf.scene;
+        model.traverse((o) => {
+            if (o.isMesh && o.material.map){
+                    originalMaterials.push(o.material);
+                    const objectShaderMat = CreatePixelShaderMaterial();
+                    objectShaderMat.uniforms.mainTex.value = o.material.map;
+                    objectShaderMat.uniforms.resolution.value = new THREE.Vector3(
+                        o.material.map.image.width,
+                        o.material.map.image.height
+                    );
+                    objectShaderMat.uniforms.pixelSize.value = 6;
+                    o.material = objectShaderMat;
+            }
+        });
+        scene.add(gltf.scene);
+        gltf.scene.scale.set(50,50,50);
+        gltf.scene.position.set(-70,20,0);
+    });
 
-
-    let sphereMesh2 = new THREE.Mesh(boxGeometry, sphereMat2);
-    sphereMesh2.position.set(50,0,0);
-    scene.add(sphereMesh2);
-    sceneObjects.push(sphereMesh2);
+    gltfLoader.load( "./Models/bulbasaur/scene.gltf", function( gltf ){
+        model2 = gltf.scene;
+        scene.add(gltf.scene);
+        gltf.scene.scale.set(50,50,50);
+        gltf.scene.position.set(70,20,0);
+    });
 }
 
-gltfLoader.load( "./Models/bulbasaur/scene.gltf", function( gltf ){
-    rabbitModel = gltf.scene;
-    rabbitModel.traverse((o) => {
-        if (o.isMesh && o.material.map){
-            const objectShaderMat = CreatePixelShaderMaterial();
-            objectShaderMat.uniforms.mainTex.value = o.material.map;
-            objectShaderMat.uniforms.resolution.value = new THREE.Vector3(
-                o.material.map.image.width,
-                o.material.map.image.height
-            );
-            objectShaderMat.uniforms.pixelSize.value = 6;
-            o.material = objectShaderMat;
+function ToggleShaderMat(model,useShaderMaterial){
+    model.traverse((o) => {
+        if (o.isMesh && o.material) {
+            if (useShaderMaterial) {
+                // Apply the custom shader material
+                const objectShaderMat = CreatePixelShaderMaterial();
+                objectShaderMat.uniforms.mainTex.value = o.material.map;
+                objectShaderMat.uniforms.resolution.value = new THREE.Vector3(
+                    o.material.map.image.width,
+                    o.material.map.image.height
+                );
+                objectShaderMat.uniforms.pixelSize.value = 32;
+                o.material = objectShaderMat;
+            } else {
+                // Revert to the original material
+                o.material = originalMaterials[o.materialIndex]; // Ensure you have a way to track the index or handle multiple materials per mesh
+            }
         }
     });
-    scene.add(gltf.scene);
-    gltf.scene.scale.set(30,30,30);
-    gltf.scene.position.set(-50,20,0);
-});
-
-gltfLoader.load( "./Models/bulbasaur/scene.gltf", function( gltf ){
-    rabbitModel2 = gltf.scene;
-    scene.add(gltf.scene);
-    gltf.scene.scale.set(30,30,30);
-    gltf.scene.position.set(50,20,0);
-});
+}
 
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
 scene.add(ambientLight);
 
-
+function handleKeyDown(event){
+    if (event.keyCode === 80){
+        console.log("pressed");
+        ToggleShaderMat(model, useShaderMaterial);
+        useShaderMaterial = !useShaderMaterial;
+    }
+}
 
 let direction = 1
 let t = 0;
@@ -189,9 +207,9 @@ function animate() {
         object.rotation.x += 0.01
         object.rotation.y += 0.01
     }
-    if (rabbitModel && rabbitModel2){
-        rabbitModel.rotation.y += 0.01;
-        rabbitModel2.rotation.y += 0.01;
+    if (model && model2){
+        model.rotation.y += 0.01;
+        model2.rotation.y += 0.01;
     }
     renderer.render(scene, camera);
 }
