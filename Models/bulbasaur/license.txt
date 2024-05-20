@@ -1,0 +1,11 @@
+Model Information:
+* title:	Bulbasaur
+* source:	https://sketchfab.com/3d-models/bulbasaur-64815cda802746b8b1be2e2246db4b35
+* author:	fongoose (https://sketchfab.com/fongoose)
+
+Model License:
+* license type:	CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
+* requirements:	Author must be credited. No commercial use.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Bulbasaur" (https://sketchfab.com/3d-models/bulbasaur-64815cda802746b8b1be2e2246db4b35) by fongoose (https://sketchfab.com/fongoose) licensed under CC-BY-NC-4.0 (http://creativecommons.org/licenses/by-nc/4.0/)
