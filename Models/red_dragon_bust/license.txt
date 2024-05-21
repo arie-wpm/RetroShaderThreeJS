@@ -1,0 +1,11 @@
+Model Information:
+* title:	Red Dragon bust
+* source:	https://sketchfab.com/3d-models/red-dragon-bust-92fefac5f4114b9580fce671db6c7080
+* author:	Polenta (https://sketchfab.com/kln)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Red Dragon bust" (https://sketchfab.com/3d-models/red-dragon-bust-92fefac5f4114b9580fce671db6c7080) by Polenta (https://sketchfab.com/kln) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
