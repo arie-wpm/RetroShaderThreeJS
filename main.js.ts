@@ -3,6 +3,7 @@ import {string} from "three/examples/jsm/nodes/shadernode/ShaderNode";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as dat from 'dat.gui';
+import pixelFragment from "shaders/pixelFragment.glsl";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 20000 );
@@ -17,10 +18,10 @@ const orbitControls = new OrbitControls(camera, renderer.domElement);
 let rotate: boolean = true;
 const textureLoader = new THREE.TextureLoader();
 const gltfLoader = new GLTFLoader();
-let model;
+let model: THREE.Group<THREE.Object3DEventMap>;
 let shaderMat: THREE.ShaderMaterial;
-let shaderMaterials = [];
-let models = [];
+let shaderMaterials: THREE.ShaderMaterial[] = [];
+let models: THREE.Group<THREE.Object3DEventMap>[] = [];
 let gui = new dat.GUI({
     name: "Shader Options"
 });
@@ -117,7 +118,7 @@ function CreatePixelShaderMaterial(){
             blueColourCount: {value: shaderParams.colourCount},
         },
         vertexShader: _VS,
-        fragmentShader: _FS,
+        fragmentShader: pixelFragment,
     })
 }
 
@@ -153,24 +154,32 @@ function InitLandscape(){
     scene.add(skybox);
 }
 
-function LoadModel(pathToModel, scale, position){
+function LoadModel(pathToModel: string, scale: THREE.Vector3, position: THREE.Vector3){
     gltfLoader.load( pathToModel, function( gltf ){
         shaderMat = CreatePixelShaderMaterial();
         shaderMaterials.push(shaderMat);
         model = gltf.scene;
         model.traverse((o) => {
+            // @ts-ignore
             if (o.isMesh && o.material.map){
+                // @ts-ignore
                 o.material.map.minFilter = THREE.NearestFilter;
+                // @ts-ignore
                 o.material.map.magFilter = THREE.NearestFilter;
+                // @ts-ignore
                 o.material.map.wrapS = THREE.RepeatWrapping;
+                // @ts-ignore
                 o.material.map.wrapT = THREE.RepeatWrapping;
-
+                // @ts-ignore
                 shaderMat.uniforms.mainTex.value = o.material.map;
                 shaderMat.uniforms.resolution.value = new THREE.Vector2(
+                    // @ts-ignore
                     o.material.map.image.width,
+                    // @ts-ignore
                     o.material.map.image.height
                 );
                 shaderMat.uniforms.pixelSize.value = shaderParams.pixelSize;
+                // @ts-ignore
                 o.material = shaderMat;
             }
         });
@@ -196,7 +205,7 @@ function CreateCube(){
     scene.add(cubeMesh);
         
 }
-function LogCameraPos(event){
+function LogCameraPos(event: { keyCode: number; }){
     if (event.keyCode === 80){
         console.log(camera.position.x, camera.position.y, camera.position.z);
         console.log(camera.rotation);
