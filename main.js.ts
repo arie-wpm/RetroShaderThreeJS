@@ -5,7 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as dat from 'dat.gui';
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000 );
+const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 20000 );
 camera.position.z = -100;
 camera.position.x = 100;
 camera.position.y = 50;
@@ -32,7 +32,7 @@ const shaderParams = {
     ditherSpread: 0,
     colourCount:64,
     dithering: true,
-    rotate: false
+    rotate: true
 }
 
 let _VS: string  = `
@@ -123,9 +123,34 @@ function CreatePixelShaderMaterial(){
 
 function InitSceneObjects(){
     
-    LoadModel("./Models/bulbasaur/scene.gltf", new THREE.Vector3(100,100,100),new THREE.Vector3(0,0,0));
-    LoadModel("./Models/red_dragon_bust/scene.gltf", new THREE.Vector3(25,25,25),new THREE.Vector3(200,10,0))
-    LoadModel("./Models/sword/scene.gltf", new THREE.Vector3(1000,1000,1000),new THREE.Vector3(-100,10,0))
+    let bulbasaur = LoadModel("./Models/bulbasaur/scene.gltf", new THREE.Vector3(100,100,100),new THREE.Vector3(0,0,0));
+    let dragon = LoadModel("./Models/red_dragon_bust/scene.gltf", new THREE.Vector3(25,25,25),new THREE.Vector3(200,10,0))
+    let sword = LoadModel("./Models/sword/scene.gltf", new THREE.Vector3(1000,1000,1000),new THREE.Vector3(-100,10,0))
+    InitLandscape();
+}
+
+function InitLandscape(){
+    let planeGeometry = new THREE.PlaneGeometry(1000,1000,10);
+    let planeMaterial = new THREE.MeshBasicMaterial({
+        color: new THREE.Color(.7,1,1),
+        side: THREE.DoubleSide,
+    })
+    let plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.position.set(0,-50,0);
+    plane.rotation.x = -Math.PI / 2;
+    scene.add(plane);
+    
+    const skyBoxGeometry = new THREE.BoxGeometry(10000,10000,10000);
+    const cubeMaterials = [
+        new THREE.MeshBasicMaterial({map: textureLoader.load("skybox/front.png", ), side: THREE.DoubleSide}),
+        new THREE.MeshBasicMaterial({map: textureLoader.load("skybox/back.png"), side: THREE.DoubleSide}),
+        new THREE.MeshBasicMaterial({map: textureLoader.load("skybox/up.png"), side: THREE.DoubleSide}),
+        new THREE.MeshBasicMaterial({map: textureLoader.load("skybox/down.png"),side: THREE.DoubleSide}),
+        new THREE.MeshBasicMaterial({map: textureLoader.load("skybox/left.png"), side: THREE.DoubleSide}),
+        new THREE.MeshBasicMaterial({map: textureLoader.load("skybox/right.png"), side: THREE.DoubleSide}),
+    ];
+    const skybox = new THREE.Mesh(skyBoxGeometry, cubeMaterials);
+    scene.add(skybox);
 }
 
 function LoadModel(pathToModel, scale, position){
@@ -154,6 +179,7 @@ function LoadModel(pathToModel, scale, position){
         gltf.scene.position.set(position.x, position.y,position.z);
         models.push(model);
     });
+    return model;
 }
 
 function CreateCube(){
@@ -180,8 +206,8 @@ function LogCameraPos(event){
 document.addEventListener("keydown", LogCameraPos);
 
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-scene.add(ambientLight);
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+//scene.add(ambientLight);
 
 
 function animate() {
