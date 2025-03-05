@@ -3,7 +3,7 @@ import {string} from "three/examples/jsm/nodes/shadernode/ShaderNode";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as dat from 'dat.gui';
-import pixelFragment from "shaders/pixelFragment.glsl";
+import pixelFragment from "/shaders/pixelFragment.glsl";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 20000 );
